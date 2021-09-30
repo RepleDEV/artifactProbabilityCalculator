@@ -1,0 +1,21 @@
+{
+    "name": "artifact_probability_calculator_web-scraper",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./out/index.js",
+    "scripts": {
+        "watch": "tsc -w",
+        "build": "tsc"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "MIT",
+    "devDependencies": {
+        "@types/node": "^16.10.2",
+        "@types/request-promise": "^4.1.48"
+    },
+    "dependencies": {
+        "cheerio": "^1.0.0-rc.10",
+        "request-promise": "^4.2.6"
+    }
+}
