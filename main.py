@@ -1,7 +1,7 @@
 import json
 
 # Importing files
-file_name = "file.json"
+file_name = "file_2.json"
 
 with open(f"./webscraper/{file_name}", 'r') as f:
     file = json.load(f)
@@ -33,14 +33,17 @@ def main(arti_type, substat_1, substat_2, substat_3, substat_4='', main_stat='',
     PS: Case sensitive.
     """
     has_mainstats = True if main_stat != '' else False
-    # Step 1, set probability
+
     current_probability = 1
-    # Step 2, type probability (since 1 domain artifact has a chance of getting 2 artifacts type)
+
+    # Step 1, Artifact set probability
     current_probability /= 2
+    # Step 2, type probability (since 1 domain artifact has a chance of getting 2 artifacts type)
+    current_probability /= 5
     # Step 3, main stat probability, if artifact has main_stat:
     if has_mainstats:
         current_probability *= (main_stats[arti_type][main_stat] / 100)
-
+    
     # Step 4, if full substats
     if (full_substats):
         current_probability *= 0.25
@@ -50,7 +53,12 @@ def main(arti_type, substat_1, substat_2, substat_3, substat_4='', main_stat='',
     # Step 5, Substats
     if has_mainstats:
         # List of numbers of substats
-        chances = sub_stats[arti_type][main_stat]
+        main_stat_substats = main_stat
+        
+        if "DMG Bonus%" in main_stat_substats:
+                    main_stat_substats = "Elm_Phys_Bonus"
+
+        chances = sub_stats[arti_type][main_stat_substats]
     else:
         chances = sub_stats[arti_type]
     chances_keys = list(chances.keys())
