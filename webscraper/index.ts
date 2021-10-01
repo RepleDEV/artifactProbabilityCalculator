@@ -18,7 +18,7 @@ function processTable($table: Cheerio<Element>, $: CheerioAPI): {[key: string]: 
     return res;
 }
 
-(async() => {
+async function webscrape(): Promise<void> {
     // Webscrape
     const data = await request("https://genshin-impact.fandom.com/wiki/Artifacts/Distribution");
     const $ = cheerio.load(data);
@@ -105,4 +105,4 @@ function processTable($table: Cheerio<Element>, $: CheerioAPI): {[key: string]: 
     });
 
     await fs.writeFile(path.resolve("./file.json"), finalOutput);
-})();
+}
