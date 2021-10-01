@@ -2,7 +2,7 @@ from main import main
 import json
 
 # Importing files
-file_name = "file.json"
+file_name = "file_2.json"
 
 with open(f"./webscraper/{file_name}", 'r') as f:
     file = json.load(f)
@@ -13,6 +13,7 @@ arti_types = list(file["subStats"].keys())
 for i in range(len(arti_types)):
     print(f"Arti type: {i + 1}")
 
+    # If feather / flower
     if (i < 2):
         arti_type = arti_types[i]
         sub_stats = file['subStats'][arti_type]
@@ -41,12 +42,12 @@ for i in range(len(arti_types)):
         main_stats = list(file["mainStats"][arti_type].keys())
         for j in range(len(main_stats)):
             main_stat = main_stats[j]
-            #main_stat_substats = main_stat
+            main_stat_substats = main_stat
 
-            if "DMG Bonus%" in main_stat:
-                main_stat = "Elm_Phys_Bonus"
+            if "DMG Bonus%" in main_stat_substats:
+                main_stat_substats = "Elm_Phys_Bonus"
 
-            sub_stats = file['subStats'][arti_type][main_stat]
+            sub_stats = file['subStats'][arti_type][main_stat_substats]
 
             sub_stats_keys = list(sub_stats.keys())
 
