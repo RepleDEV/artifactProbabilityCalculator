@@ -30,7 +30,7 @@ async function webscrape(): Promise<void> {
     let subStatDistribution = $tables.splice(0, 2) as Cheerio<Element>[];
     // Next few has differing sub stat distributions depending on the main stat
     //! Sands
-    const sandsMainStats = ["HP%", "ATK%", "DEF%", "ER", "EM"]; // List of main stats
+    const sandsMainStats = ["HP%", "ATK%", "DEF%", "Energy Recharge%", "Elemental Mastery"]; // List of main stats
     const sandsSubStatDistributionTables = ($tables.splice(0, 5) as Cheerio<Element>[]); // Get table of main stats
 
     let sandsSubStatDistributionObject: {[key: string]: Cheerio<Element>} = {}; // Empty object to store said distributions
@@ -42,7 +42,7 @@ async function webscrape(): Promise<void> {
     }
     // Do the same for other 2 types
     //! Goblet
-    const gobletMainStats = ["HP%", "ATK%", "DEF%", "Elm_Phys_Bonus", "EM"]; // List of main stats
+    const gobletMainStats = ["HP%", "ATK%", "DEF%", "Elm_Phys_Bonus", "Elemental Mastery"]; // List of main stats
     const gobletSubStatDistributionTables = ($tables.splice(0, 5) as Cheerio<Element>[]); // Get table of main stats
 
     let gobletSubStatDistributionObject: {[key: string]: Cheerio<Element>} = {}; // Empty object to store said distributions
@@ -53,8 +53,8 @@ async function webscrape(): Promise<void> {
         gobletSubStatDistributionObject[gobletMainStats[i]] = gobletSubStatDistributionTable;
     }
     //! Circlet
-    const circletMainStats = ["HP%", "ATK%", "DEF%", "CRate", "CDMG", "HB%", "EM"]; // List of main stats
-    const circletSubStatDistributionTables = ($tables.splice(0, 5) as Cheerio<Element>[]); // Get table of main stats
+    const circletMainStats = ["HP%", "ATK%", "DEF%", "CRIT Rate%", "CRIT DMG%", "Healing Bonus%", "Elemental Mastery"]; // List of main stats
+    const circletSubStatDistributionTables = ($tables.splice(0, 7) as Cheerio<Element>[]); // Get table of main stats
 
     let circletSubStatDistributionObject: {[key: string]: Cheerio<Element>} = {}; // Empty object to store said distributions
     for (let i = 0;i < circletSubStatDistributionTables.length;i++) {
@@ -104,5 +104,7 @@ async function webscrape(): Promise<void> {
         }
     });
 
-    await fs.writeFile(path.resolve("./file.json"), finalOutput);
+    await fs.writeFile(path.resolve("./file_2.json"), finalOutput);
 }
+
+webscrape()

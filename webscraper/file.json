@@ -202,7 +202,7 @@
                 "CRIT Rate%": 7.5,
                 "CRIT DMG%": 7.5
             },
-            "CRate": {
+            "CRIT Rate%": {
                 "HP": 14.63,
                 "ATK": 14.63,
                 "DEF": 14.63,
@@ -213,7 +213,7 @@
                 "EM": 9.76,
                 "CRIT DMG%": 7.32
             },
-            "CDMG": {
+            "CRIT DMG%": {
                 "HP": 14.63,
                 "ATK": 14.63,
                 "DEF": 14.63,
