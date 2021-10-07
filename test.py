@@ -9,7 +9,109 @@ with open(f"./webscraper/{file_name}", 'r') as f:
 
 full_chance = 0
 
+def checkDuplicates(arr):
+    sortedArray = arr
+    sortedArray.sort()
+
+    lastElement = sortedArray[0]
+
+    for i in range(1, len(arr)):
+        if (sortedArray[i] == lastElement):
+            return True
+        lastElement = sortedArray[i]
+    
+    return False
+
+def getAllCombinations(values, combination_num=4):
+    combination = [0] * combination_num
+    combinations = [combination.copy()]
+
+    for n in range(len(values)**len(combination)):
+        for i in range(len(combination) -1, -1, - 1):
+            combination[i] += 1
+
+            if combination[i] == len(values):
+                combination[i] = 0
+            else:
+                combinations.append(combination.copy())
+                break
+    
+    filteredCombinations = list(filter(lambda x: not checkDuplicates(x), combinations))
+
+    return list(map(lambda x: list(map(lambda y: values[y], x)), filteredCombinations))
+
 arti_types = list(file["subStats"].keys())
+
+chances = 0
+
+for i in range(len(arti_types)):
+    arti_type = arti_types[i]
+    
+    # If feather / flower
+    if (i < 2):
+        sub_stats = file["subStats"][arti_type]
+        sub_stats_keys = list(sub_stats.keys())
+
+        combinations = getAllCombinations(sub_stats_keys)
+
+        for j in range(len(combinations)):
+            combination = combinations[j]
+
+            chances += main(arti_type, combination[0], combination[1], combination[2], combination[3], full_substats=True)
+    else:
+        main_stats = list(file["mainStats"][arti_type].keys())
+        for j in range(len(main_stats)):
+            main_stat = main_stats[j]
+            main_stat_substat = main_stat
+
+            if "DMG Bonus%" in main_stat_substat:
+                main_stat_substat = "Elm_Phys_Bonus"
+
+            sub_stats = file["subStats"][arti_type][main_stat_substat]
+            sub_stats_keys = list(sub_stats.keys())
+
+            combinations = getAllCombinations(sub_stats_keys)
+
+            for k in range(len(combinations)):
+                combination = combinations[k]
+
+                chances += main(arti_type, combination[0], combination[1], combination[2], combination[3], main_stat=main_stat, full_substats=True)
+    
+    #! 3 substat artifacts
+
+    # If feather / flower
+    if (i < 2):
+        sub_stats = file["subStats"][arti_type]
+        sub_stats_keys = list(sub_stats.keys())
+
+        combinations = getAllCombinations(sub_stats_keys, 3)
+
+        for j in range(len(combinations)):
+            combination = combinations[j]
+
+            chances += main(arti_type, combination[0], combination[1], combination[2], full_substats=False)
+    else:
+        main_stats = list(file["mainStats"][arti_type].keys())
+        for j in range(len(main_stats)):
+            main_stat = main_stats[j]
+            main_stat_substat = main_stat
+
+            if "DMG Bonus%" in main_stat_substat:
+                main_stat_substat = "Elm_Phys_Bonus"
+
+            sub_stats = file["subStats"][arti_type][main_stat_substat]
+            sub_stats_keys = list(sub_stats.keys())
+
+            combinations = getAllCombinations(sub_stats_keys, 3)
+
+            for k in range(len(combinations)):
+                combination = combinations[k]
+
+                chances += main(arti_type, combination[0], combination[1], combination[2], main_stat=main_stat, full_substats=False)
+
+print(chances)
+
+"""
 for i in range(len(arti_types)):
     print(f"Arti type: {i + 1}")
 
@@ -71,7 +173,7 @@ for i in range(len(arti_types)):
             
 
 print(full_chance)
-
+"""
 
 """
 VALUES = [1, 2, 3, 4]
