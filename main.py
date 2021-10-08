@@ -1,5 +1,6 @@
 from functools import reduce
-from itertools import permutations
+from itertools import permutations, combinations
+from numpy import array, sum
 import json
 
 # Importing files
@@ -8,20 +9,11 @@ file_name = "file_2.json"
 with open(f"./webscraper/{file_name}", 'r') as f:
     file = json.load(f)
 
-# Flower artifact mainstats is always HP, while feather is always ATK
-genshin_artifacts = ['sands', 'goblet', 'circlet', 'flower', 'feather']
-
 main_stats = file['mainStats']
 sub_stats = file['subStats']
 
-# Probabilities: returns a list of numbers, scaled version of probabilities
-def rescale_probabilities(probabilities, index):
-    probabilities.pop(index)
-    sum_of_probabilities = sum(probabilities)
-    scaling = 100 / sum_of_probabilities
-    return list(map(lambda x: x * scaling, probabilities))
-
-def calculate_substat_probabilities(arr):
+# Calculate scaled probabilities for len(arr) substats
+def scale_substat_probabilities(arr):
     probabilities = arr.copy()
 
     for i in range(1, len(probabilities)):
@@ -30,6 +22,30 @@ def calculate_substat_probabilities(arr):
                 probabilities[i + j] = round(probabilities[i + j], 5)
 
     return probabilities
+
+# Substat probability calculator
+# TODO: Make this easier to read :)
+def calculate_substat_probability(desired_substats, substat_amount=4, any_order=True):
+    # 1. Get all combinations for the substats. This returns [desired_substats] when substat_amount == 4
+    substat_combinations = list(combinations(list(desired_substats), substat_amount))
+    # If any order is true
+    if any_order:
+        # Get all permutations of all combinations.
+        substat_combinations = list(map(lambda x: list(permutations(x)), substat_combinations))
+    # Flatten 1+nd array to 1d array w/ numpy
+    substat_combinations = list(
+        array(
+            substat_combinations
+        ).flatten()
+    )
+    # See: https://stackoverflow.com/a/4998460/13160047
+    # Group array elements by substat_amount
+    substat_combinations = [substat_combinations[n:n+substat_amount] for n in range(0, len(substat_combinations), substat_amount)]
+    # Scale probabilities of all combinations
+    substat_combinations = list(map(lambda x: reduce(lambda a, b: a * b, scale_substat_probabilities(x)), substat_combinations))
+    # Return sum
+    return float(sum(array(substat_combinations)))
+
 # Main function
 def main(
     arti_type, 
@@ -55,72 +71,67 @@ def main(
     :return: a float number of the probability (ex: 0.00084738)
     PS: Case sensitive.
     """
-    has_mainstats = main_stat != ''
+    ## Constants
+    HAS_MAINSTATS = main_stat != ''
+    SET_PROBABILITY = 1/2
+    TYPE_PROBABILITY = 1/5
 
+    # Will be final result
     current_probability = 1
 
     # Step 1, Artifact set probability
     if (set_probability):
-        current_probability *= 1/2
+        current_probability *= SET_PROBABILITY
     # Step 2, type probability (since 1 domain artifact has a chance of getting 2 artifacts type)
     if (type_probability):
-        current_probability *= 1/5
-    # Step 3, main stat probability, if artifact has main_stat:
+        current_probability *= TYPE_PROBABILITY
 
-    if has_mainstats:
-        current_probability *= (main_stats[arti_type][main_stat] / 100)
+    # Also, define substat_distribution variable for later
+    substat_distribution = sub_stats[arti_type]
+
+    # Step 3, check if artifact is not flower or feather.
+    if arti_type != "flower" and arti_type != "feather":
+        # If it is, main_stat parameter must be filled because the substat distributions
+        # are dependant on the main_stat parameter
+
+        if HAS_MAINSTATS:
+            current_probability *= (main_stats[arti_type][main_stat] / 100)
+
+            #! Substat JSON key workaround
+            # Copy main_stat variable
+            main_stat_substats = main_stat
+                
+            # This checks if main_stat is {Element/Physical} Bonus%
+            if "DMG Bonus%" in main_stat_substats:
+                # Then replaces it with: (cuz {Element/Physical} Bonus% main stat artifacts have the same sub stat distributions)
+                # And is grouped together in the JSON file
+                # Thus
+                main_stat_substats = "Elm_Phys_Bonus"
+            #! Substat JSON key workaround
+
+            # re-define substat_distribution variable for later
+            substat_distribution = sub_stats[arti_type][main_stat_substats]
+        else:
+            # Raise error >:)
+            raise ValueError("Parameter arti_type is not \"flower\" or \"feather\".\nParameter main_stat must be filled.")
     
 
-    # Step 4, if full substats
+    # # Check if probability for full substats is enabled
     if (full_substats_probabilities):
+        # If so, (Step 4) check if full (4) substats parameter
         if (full_substats):
             current_probability *= 1/4
         else:
             current_probability *= 3/4
 
-    current_probability_before_substats = current_probability
+    substats = [substat_1, substat_2, substat_3, substat_4]
 
-    # Step 5, Substats
-    if has_mainstats:
-        # List of numbers of substats
-        main_stat_substats = main_stat
-        
-        if "DMG Bonus%" in main_stat_substats:
-                    main_stat_substats = "Elm_Phys_Bonus"
+    chances_substats = list(map(lambda x: substat_distribution[x] / 100, substats))
+    substat_chances = calculate_substat_probability(chances_substats, substat_amount=4 if full_substats else 3, any_order=any_order)
 
-        chances = sub_stats[arti_type][main_stat_substats]
-    else:
-        chances = sub_stats[arti_type]
-
-    if full_substats:
-        # Returns ['HP', 'HP%', 'DEF', 'ATK]
-        substats = [substat_1, substat_2, substat_3, substat_4]
-    else:
-        # Returns ['HP', 'DEF', 'ATK]
-        substats = [substat_1, substat_2, substat_3]
-
-    chances_substats = list(map(lambda x: chances[x] / 100,substats))
-
-    if (any_order):
-        # TODO: make a better algorithm KKonaW
-        chances_substats_perms = list(permutations(chances_substats))
-        # [tuple] to [list]
-        chances_substats_perms = list(map(lambda x: list(x), chances_substats_perms))
-
-        substat_chances = 0
-
-        for i in range(len(chances_substats_perms)):
-            chances_substats = chances_substats_perms[i]
-
-            calculated_chances = calculate_substat_probabilities(chances_substats)
-            substat_chances += reduce(lambda a, b: a*b,list(map(lambda x: x, calculated_chances)))
-
-        current_probability *= substat_chances
-    else:
-        calculated_chances = calculate_substat_probabilities(chances_substats)
-        current_probability *= reduce(lambda a, b: a*b,list(map(lambda x: x, calculated_chances)))
+    current_probability *= substat_chances
 
     return round(current_probability * 100, 5)
 
 
-print(main("feather", "HP%", "CRIT Rate%", "CRIT DMG%", "ATK%", full_substats=True, any_order=True, full_substats_probabilities=False))
+print(main("feather", "HP%", "CRIT Rate%", "CRIT DMG%", "ATK%", full_substats=True, any_order=False, full_substats_probabilities=False))
