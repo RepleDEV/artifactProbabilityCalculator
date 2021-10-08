@@ -90,7 +90,7 @@ for i in range(len(arti_types)):
         for k in range(len(substatCombinations)):
             substatCombination = substatCombinations[k]
 
-            full_chance += main(arti_type, substatCombination[0], substatCombination[1], substatCombination[2], substatCombination[3], main_stat=mainStat, full_substats=True, type_probability=True)
+            full_chance += main(arti_type, substatCombination[0], substatCombination[1], substatCombination[2], substatCombination[3], main_stat=mainStat, full_substats=True, full_substats_probabilities=False, type_probability=True)
 
 
 print(full_chance)

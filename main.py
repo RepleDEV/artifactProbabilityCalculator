@@ -134,4 +134,4 @@ def main(
     return round(current_probability * 100, 5)
 
 
-print(main("feather", "HP%", "CRIT Rate%", "CRIT DMG%", "ATK%", full_substats=True, any_order=False, full_substats_probabilities=False))
+print(main("feather", "HP%", "CRIT Rate%", "CRIT DMG%", "ATK%", full_substats=True, full_substats_probabilities=False))
