@@ -25,24 +25,15 @@ def scale_substat_probabilities(arr):
 
 # Substat probability calculator
 # TODO: Make this easier to read :)
-def calculate_substat_probability(desired_substats, substat_amount=4, any_order=True):
+def calculate_substat_probability(desired_substats, any_order=True):
     # 1. Get all combinations for the substats. This returns [desired_substats] when substat_amount == 4
-    substat_combinations = list(combinations(list(desired_substats), substat_amount))
+    substat_combinations = desired_substats.copy()
     # If any order is true
     if any_order:
         # Get all permutations of all combinations.
-        substat_combinations = list(map(lambda x: list(permutations(x)), substat_combinations))
-    # Flatten 1+nd array to 1d array w/ numpy
-    substat_combinations = list(
-        array(
-            substat_combinations
-        ).flatten()
-    )
-    # See: https://stackoverflow.com/a/4998460/13160047
-    # Group array elements by substat_amount
-    substat_combinations = [substat_combinations[n:n+substat_amount] for n in range(0, len(substat_combinations), substat_amount)]
+        substat_combinations = list(permutations(substat_combinations))
     # Scale probabilities of all combinations
-    substat_combinations = list(map(lambda x: reduce(lambda a, b: a * b, scale_substat_probabilities(x)), substat_combinations))
+    substat_combinations = list(map(lambda x: reduce(lambda a, b: a * b, scale_substat_probabilities(list(x))), substat_combinations))
     # Return sum
     return float(sum(array(substat_combinations)))
 
@@ -127,11 +118,11 @@ def main(
     substats = [substat_1, substat_2, substat_3, substat_4]
 
     chances_substats = list(map(lambda x: substat_distribution[x] / 100, substats))
-    substat_chances = calculate_substat_probability(chances_substats, substat_amount=4 if full_substats else 3, any_order=any_order)
+    substat_chances = calculate_substat_probability(chances_substats, any_order=any_order)
 
     current_probability *= substat_chances
 
     return round(current_probability * 100, 5)
 
 
-print(main("feather", "HP%", "CRIT Rate%", "CRIT DMG%", "ATK%", full_substats=True, full_substats_probabilities=False))
+# print(main("goblet", "HP%", "CRIT Rate%", "CRIT DMG%", "Elemental Mastery", main_stat="Pyro DMG Bonus%", full_substats=False, full_substats_probabilities=False, type_probability=True))

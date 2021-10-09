@@ -60,37 +60,41 @@ def getAllCombinations(values, combination_num=4):
 
 
 ########################################
-full_chance = 0
+def test_full_substats():
+    full_chance = 0
 
-arti_types = list(file["subStats"].keys())
+    arti_types = list(file["subStats"].keys())
 
-for i in range(len(arti_types)):
-    arti_type = arti_types[i]
-    mainStats = list(file["mainStats"][arti_type].keys())
+    for i in range(len(arti_types)):
+        arti_type = arti_types[i]
+        mainStats = list(file["mainStats"][arti_type].keys())
 
-    for j in range(len(mainStats)):
-        mainStat = mainStats[j]
+        for j in range(len(mainStats)):
+            mainStat = mainStats[j]
 
-        # substatCombinations = getAllCombinations(subStats, 4)
+            # substatCombinations = getAllCombinations(subStats, 4)
 
-        if (i < 2):
-            subStats = list(file["subStats"][arti_type].keys())
-            mainStat = ""
-        else:
-            mainStat_subStat = mainStat
+            if (i < 2):
+                subStats = list(file["subStats"][arti_type].keys())
+                mainStat = ""
+            else:
+                mainStat_subStat = mainStat
 
-            if "DMG Bonus%" in mainStat:
-                mainStat_subStat = "Elm_Phys_Bonus"
+                if "DMG Bonus%" in mainStat:
+                    mainStat_subStat = "Elm_Phys_Bonus"
 
-            subStats = list(file["subStats"][arti_type][mainStat_subStat].keys())
+                subStats = list(file["subStats"][arti_type][mainStat_subStat].keys())
 
-        substatCombinations = combinations(subStats, 4)
-        substatCombinations = list(map(lambda x: list(x), substatCombinations))
+            substatCombinations = combinations(subStats, 4)
+            substatCombinations = list(map(lambda x: list(x), substatCombinations))
 
-        for k in range(len(substatCombinations)):
-            substatCombination = substatCombinations[k]
+            for k in range(len(substatCombinations)):
+                substatCombination = substatCombinations[k]
 
-            full_chance += main(arti_type, substatCombination[0], substatCombination[1], substatCombination[2], substatCombination[3], main_stat=mainStat, full_substats=True, full_substats_probabilities=False, type_probability=True)
+                full_chance += main(arti_type, substatCombination[0], substatCombination[1], substatCombination[2], substatCombination[3], main_stat=mainStat, full_substats=True, full_substats_probabilities=False, type_probability=True)
+                
+    return full_chance
 
+full_chance = test_full_substats()
 
 print(full_chance)
