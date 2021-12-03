@@ -25,9 +25,21 @@ def scale_substat_probabilities(arr):
 
 # Substat probability calculator
 # TODO: Make this easier to read :)
-def calculate_substat_probability(desired_substats, any_order=True):
-    # 1. Get all combinations for the substats. This returns [desired_substats] when substat_amount == 4
-    substat_combinations = desired_substats.copy()
+def calculate_substat_probability(desired_substats, all_substats, any_order=True):
+    substat_combinations = []
+
+    if len(substat_combinations) < 4:
+        # all_substats - desired_substats
+        filteredSubstats = list(filter(lambda x: x not in desired_substats, all_substats))
+        fill_number = 4 - len(desired_substats)
+
+        fill_combinations = combinations(filteredSubstats, fill_number)
+
+        for i, v in enumerate(fill_combinations):
+            substat_combinations.append(desired_substats + v)
+    else:
+        substat_combinations[0] = desired_substats.copy()
+
     # If any order is true
     if any_order:
         # Get all permutations of all combinations.
@@ -39,11 +51,8 @@ def calculate_substat_probability(desired_substats, any_order=True):
 
 # Main function
 def main(
-    arti_type, 
-    substat_1, 
-    substat_2, 
-    substat_3, 
-    substat_4='', 
+    arti_type,
+    substats=[],
     main_stat='', 
     full_substats=False, 
     full_substats_probabilities=True,
@@ -111,18 +120,20 @@ def main(
     if (full_substats_probabilities):
         # If so, (Step 4) check if full (4) substats parameter
         if (full_substats):
-            current_probability *= 1/4
+            current_probability *= 1/5
         else:
-            current_probability *= 3/4
+            current_probability *= 4/5
 
-    substats = [substat_1, substat_2, substat_3, substat_4]
+    # substats = [substat_1, substat_2, substat_3, substat_4]
 
+    # Rescale percentage to decimal (0...100) to (0...1)
     chances_substats = list(map(lambda x: substat_distribution[x] / 100, substats))
-    substat_chances = calculate_substat_probability(chances_substats, any_order=any_order)
+    substat_chances = calculate_substat_probability(chances_substats, sub_stats[arti_type][main_stat],any_order=any_order)
 
     current_probability *= substat_chances
 
-    return round(current_probability * 100, 5)
+    # Optional: multiply this by 1.07 cuz from 1 fragile run there's a 7% chance u get 2 artis
+    return round(current_probability * 100, 5);
 
 
 # print(main("goblet", "HP%", "CRIT Rate%", "CRIT DMG%", "Elemental Mastery", main_stat="Pyro DMG Bonus%", full_substats=False, full_substats_probabilities=False, type_probability=True))
